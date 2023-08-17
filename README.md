@@ -30,7 +30,7 @@ All metrics are prefixed `porkbun_exporter_`
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/porkbun-exporter:1234567890123456789012345678901234567890
+ghcr.io/dazwilkin/porkbun-exporter:3157c4ced91f8ed6b9cae2c71c96121fad25e3d5
 ```
 
 > **NOTE** `cosign.pub` may be downloaded [here](https://github.com/DazWilkin/porkbun-exporter/blob/master/cosign.pub)
