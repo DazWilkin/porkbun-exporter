@@ -15,6 +15,9 @@ export SECRET="..."
 HOST_PORT="8080"
 CONT_PORT="8080"
 
+# Replace with your list of Porbun API-enabled domains
+DOMAINS="example.com,example,org"
+
 podman run \
 --interactive --tty --rm \
 --name=porkbun-exporter \
@@ -22,13 +25,14 @@ podman run \
 --env=SECRET=${SECRET} \
 --publish=${HOST_PORT}:${CONT_PORT}/tcp \
 ghcr.io/dazwilkin/porkbun-exporter:7b7968557aa2e1400f4875f7237ce80ed1cd439f \
---domains=example.com,example,org \
+--domains=${DOMAINS} \
 --endpoint=:${CONT_PORT} \
 --path=/metrics
 ```
 
 ## Build
 
+## Prometheus
 
 
 ## Metrics
@@ -57,3 +61,16 @@ To install `cosign`, e.g.:
 ```bash
 go install github.com/sigstore/cosign/cmd/cosign@latest
 ```
+
+## Similar Exporters
+
++ [Prometheus Exporter for Azure](https://github.com/DazWilkin/azure-exporter)
++ [Prometheus Exporter for Fly.io](https://github.com/DazWilkin/fly-exporter)
++ [Prometheus Exporter for GCP](https://github.com/DazWilkin/gcp-exporter)
++ [Prometheus Exporter for Koyeb](https://github.com/DazWilkin/koyeb-exporter)
++ [Prometheus Exporter for Linode](https://github.com/DazWilkin/linode-exporter)
++ [Prometheus Exporter for Vultr](https://github.com/DazWilkin/vultr-exporter)
+
+<hr/>
+<br/>
+<a href="https://www.buymeacoffee.com/dazwilkin" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
