@@ -32,6 +32,7 @@ func NewDomainCollector(apikey, secret string, domains []string) *DomainCollecto
 			[]string{
 				"domain",
 				"type",
+				"name",
 			},
 			nil,
 		),
@@ -52,24 +53,40 @@ func (c *DomainCollector) Collect(ch chan<- prometheus.Metric) {
 				log.Print(msg)
 				return
 			}
-			dnsTypes := make(map[string]uint16)
+
+			// DNS records comprise
+			// Type (e.g. A)
+			// Name (e.g. www.google.com)
+			// Data (e.g.192.168.1.1)
+			// The Data value may be extensive and is unlikely to be useful as a label
+			// The rather awkward map, maps type:name:count(name)
+			// For each Type, we count the number of occurrences of each Data value
+			// (A,192.168.1.1,1)
+			dnsTypesByNameByCount := make(map[string]map[string]uint16)
 
 			// Enumerate records
+			// Generating Type*Name*count values
 			for _, record := range records {
-				dnsTypes[record.Type]++
+				if _, ok := dnsTypesByNameByCount[record.Type]; !ok {
+					dnsTypesByNameByCount[record.Type] = make(map[string]uint16)
+				}
+				dnsTypesByNameByCount[record.Type][record.Name]++
 			}
 
-			// Enumerate types
-			for dnsType, count := range dnsTypes {
-				ch <- prometheus.MustNewConstMetric(
-					c.DNSTypes,
-					prometheus.GaugeValue,
-					float64(count),
-					[]string{
-						domain,
-						dnsType,
-					}...,
-				)
+			// Enumerate Type*Name label pairs with count as metric value
+			for dnsType, NameByCount := range dnsTypesByNameByCount {
+				for dnsName, count := range NameByCount {
+					ch <- prometheus.MustNewConstMetric(
+						c.DNSTypes,
+						prometheus.GaugeValue,
+						float64(count),
+						[]string{
+							domain,
+							dnsType,
+							dnsName,
+						}...,
+					)
+				}
 			}
 		}(domain)
 	}
