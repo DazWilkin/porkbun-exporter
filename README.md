@@ -24,7 +24,7 @@ podman run \
 --env=APIKEY=${APIKEY} \
 --env=SECRET=${SECRET} \
 --publish=${HOST_PORT}:${CONT_PORT}/tcp \
-ghcr.io/dazwilkin/porkbun-exporter:56130132586b4cf372e27ea00ab2398a33edffe4 \
+ghcr.io/dazwilkin/porkbun-exporter:7b7968557aa2e1400f4875f7237ce80ed1cd439f \
 --domains=${DOMAINS} \
 --endpoint=:${CONT_PORT} \
 --path=/metrics
@@ -34,6 +34,19 @@ ghcr.io/dazwilkin/porkbun-exporter:56130132586b4cf372e27ea00ab2398a33edffe4 \
 
 ## Prometheus
 
+```bash
+VERS="v2.46.0"
+
+# Binds to host network to scrape Porkbun Exporter
+podman run \
+--interactive --tty --rm \
+--net=host \
+--volume=${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml \
+--volume=${PWD}/rules.yml:/etc/alertmanager/rules.yml \
+quay.io/prometheus/prometheus:${VERS} \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.enable-lifecycle
+```
 
 ## Metrics
 
@@ -52,7 +65,7 @@ All metrics are prefixed `porkbun_exporter_`
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/porkbun-exporter:56130132586b4cf372e27ea00ab2398a33edffe4
+ghcr.io/dazwilkin/porkbun-exporter:7b7968557aa2e1400f4875f7237ce80ed1cd439f
 ```
 
 > **NOTE** `cosign.pub` may be downloaded [here](https://github.com/DazWilkin/porkbun-exporter/blob/master/cosign.pub)
