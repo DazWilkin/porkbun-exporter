@@ -13,4 +13,4 @@ groups:
     labels:
       severity: page
     annotations:
-      summary: "Porkbun example.com CNAME records!=({{ $value }}) (domain: {{ $labels.domain }})"
+      summary: "Porkbun example.com CNAME records==({{ $value }}) (domain: {{ $labels.domain }})"
