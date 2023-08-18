@@ -1,0 +1,16 @@
+groups:
+- name: porkbun_exporter
+  rules:
+  - alert: porkbun_domain_cnames
+    expr: |
+          sum by (domain) (
+            min_over_time(porkbun_exporter_dns_type{
+              domain="example.com",
+              type="CNAME"
+            }[15m])
+          ) != 5
+    for: 1h
+    labels:
+      severity: page
+    annotations:
+      summary: "Porkbun example.com CNAME records!=({{ $value }}) (domain: {{ $labels.domain }})"
