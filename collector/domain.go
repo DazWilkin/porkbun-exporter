@@ -28,7 +28,7 @@ func NewDomainCollector(apikey, secret string, domains []string) *DomainCollecto
 
 		DNSTypes: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, subsystem, "dns_type"),
-			"A metric that totals a domain's DNS record types",
+			"A metric that totals a domain's DNS records by type",
 			[]string{
 				"domain",
 				"type",
