@@ -24,7 +24,7 @@ podman run \
 --env=APIKEY=${APIKEY} \
 --env=SECRET=${SECRET} \
 --publish=${HOST_PORT}:${CONT_PORT}/tcp \
-ghcr.io/dazwilkin/porkbun-exporter:7b7968557aa2e1400f4875f7237ce80ed1cd439f \
+ghcr.io/dazwilkin/porkbun-exporter:3043e115329c6c1f63f87c32842893b0cab57d6c \
 --domains=${DOMAINS} \
 --endpoint=:${CONT_PORT} \
 --path=/metrics
@@ -65,7 +65,7 @@ All metrics are prefixed `porkbun_exporter_`
 ```bash
 cosign verify \
 --key=./cosign.pub \
-ghcr.io/dazwilkin/porkbun-exporter:7b7968557aa2e1400f4875f7237ce80ed1cd439f
+ghcr.io/dazwilkin/porkbun-exporter:3043e115329c6c1f63f87c32842893b0cab57d6c
 ```
 
 > **NOTE** `cosign.pub` may be downloaded [here](https://github.com/DazWilkin/porkbun-exporter/blob/master/cosign.pub)
