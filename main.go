@@ -89,6 +89,7 @@ func main() {
 	registry := prometheus.NewRegistry()
 	registry.MustRegister(collector.NewExporterCollector(OSVersion, GoVersion, GitCommit, StartTime))
 	registry.MustRegister(collector.NewDomainCollector(apikey, secret, domains))
+	registry.MustRegister(collector.NewSSLCollector(apikey, secret, domains))
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(handleRoot))

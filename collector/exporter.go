@@ -15,7 +15,7 @@ type ExporterCollector struct {
 	BuildInfo *prometheus.Desc
 }
 
-// NewExporterCollector returns a new ExporterCollector.
+// NewExporterCollector is a function that returns a new ExporterCollector.
 func NewExporterCollector(osVersion, goVersion, gitCommit string, startTime int64) *ExporterCollector {
 	return &ExporterCollector{
 		osVersion: osVersion,

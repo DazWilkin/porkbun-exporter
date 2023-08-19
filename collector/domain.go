@@ -2,7 +2,6 @@ package collector
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// DomainCollector is a Promethues collector that represents the Porkbun SSL functionality
 type DomainCollector struct {
 	client  *porkbun.Client
 	domains []string
@@ -19,6 +19,7 @@ type DomainCollector struct {
 	DNSTypes *prometheus.Desc
 }
 
+// NewDomainCollector is a function that creates a new DomainCollector
 func NewDomainCollector(apikey, secret string, domains []string) *DomainCollector {
 	client := porkbun.New(secret, apikey)
 
@@ -41,16 +42,29 @@ func NewDomainCollector(apikey, secret string, domains []string) *DomainCollecto
 
 // Collect implements Prometheus' Collector interface and is used to collect metrics
 func (c *DomainCollector) Collect(ch chan<- prometheus.Metric) {
+	method := "DomainCollector"
+
 	ctx := context.Background()
 	var wg sync.WaitGroup
 	for _, domain := range c.domains {
 		wg.Add(1)
 		go func(domain string) {
 			defer wg.Done()
+
+			log.Printf("[%s:go] Domain: %s", method, domain)
+
+			// Porkbun API has a 1 query/second rate limit
+			// To effect this apiRateLimiter is shared across collectors
+			// Before making Porkbun API requests, wait on the limiter
+			if err := apiRateLimiter.Wait(ctx); err != nil {
+				msg := "Porkbun API rate limit exceeded"
+				log.Printf("[%s:go] %s for domain (%s)", method, msg, domain)
+				return
+			}
 			records, err := c.client.RetrieveRecords(ctx, domain)
 			if err != nil {
-				msg := fmt.Sprintf("unable to retrieve records for domain (%s)", domain)
-				log.Print(msg)
+				msg := "unable to retrieve records for domain"
+				log.Printf("[%s:go] %s (%s)", method, msg, domain)
 				return
 			}
 
@@ -66,6 +80,7 @@ func (c *DomainCollector) Collect(ch chan<- prometheus.Metric) {
 
 			// Enumerate records
 			// Generating Type*Name*count values
+			log.Printf("[%s:go] Domain (%s) contains %d records", method, domain, len(records))
 			for _, record := range records {
 				if _, ok := dnsTypesByNameByCount[record.Type]; !ok {
 					dnsTypesByNameByCount[record.Type] = make(map[string]uint16)

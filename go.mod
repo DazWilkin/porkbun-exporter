@@ -3,8 +3,9 @@ module github.com/DazWilkin/porkbun-exporter
 go 1.21.0
 
 require (
-	github.com/nrdcg/porkbun v0.2.0
+	github.com/nrdcg/porkbun v0.2.1-0.20230819090053-857ac0e67b42
 	github.com/prometheus/client_golang v1.16.0
+	golang.org/x/time v0.3.0
 )
 
 require (
