@@ -55,7 +55,7 @@ All metrics are prefixed `porkbun_exporter_`
 |Name|Type|Description|
 |----|----|-----------|
 |`porkbun_exporter_build_info`|Counter|A metric with a constant '1' value labeled by OS version, Go version, and the Git commit of the exporter|
-|`porkbun_exporter_bundle`|Gauge|A metric with a constant value of 1 if bundle exists|
+|`porkbun_exporter_ssl_bundle`|Gauge|A metric with a constant value of 1 if bundle exists|
 |`porkbun_exporter_dns_type`|Gauge|A metric that totals a domain's DNS records by type|
 |`porkbun_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 
