@@ -53,14 +53,6 @@ func (c *DomainCollector) Collect(ch chan<- prometheus.Metric) {
 
 			log.Printf("[%s:go] Domain: %s", method, domain)
 
-			// Porkbun API has a 1 query/second rate limit
-			// To effect this apiRateLimiter is shared across collectors
-			// Before making Porkbun API requests, wait on the limiter
-			if err := apiRateLimiter.Wait(ctx); err != nil {
-				msg := "Porkbun API rate limit exceeded"
-				log.Printf("[%s:go] %s for domain (%s)", method, msg, domain)
-				return
-			}
 			records, err := c.client.RetrieveRecords(ctx, domain)
 			if err != nil {
 				msg := "unable to retrieve records for domain"

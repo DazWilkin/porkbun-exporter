@@ -4,14 +4,19 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/nrdcg/porkbun"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/time/rate"
 )
 
 // SSLCollector is a Promethues collector that represents the Porkbun DNS functionality
 type SSLCollector struct {
-	client  *porkbun.Client
+	client         *porkbun.Client
+	sslRateLimiter *rate.Limiter
+
+	// Configuration
 	domains []string
 
 	// Metrics
@@ -22,8 +27,13 @@ type SSLCollector struct {
 func NewSSLCollector(apikey, secret string, domains []string) *SSLCollector {
 	client := porkbun.New(secret, apikey)
 
+	// Porkbun API /ssl endpoint has a 1 qps rate limit (per API key)
+	sslRateLimiter := rate.NewLimiter(rate.Every(time.Second), 1)
+
 	return &SSLCollector{
-		client:  client,
+		client:         client,
+		sslRateLimiter: sslRateLimiter,
+
 		domains: domains,
 
 		Bundle: prometheus.NewDesc(
@@ -50,10 +60,9 @@ func (c *SSLCollector) Collect(ch chan<- prometheus.Metric) {
 
 			log.Printf("[%s:go] Domain: %s", method, domain)
 
-			// Porkbun API has a 1 query/second rate limit
-			// To effect this apiRateLimiter is shared across collectors
-			// Before making Porkbun API requests, wait on the limiter
-			if err := apiRateLimiter.Wait(ctx); err != nil {
+			// Porkbun API /ssl endpoint has a 1 qps rate limit
+			// Before making requests on /ssl endpoint, wait on the limiter
+			if err := c.sslRateLimiter.Wait(ctx); err != nil {
 				msg := "Porkbun API rate limit exceeded"
 				log.Printf("[%s:go] %s for domain (%s)", method, msg, domain)
 				return
