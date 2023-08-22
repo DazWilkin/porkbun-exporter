@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  gcp-exporter:
+  porkbun-exporter:
     name: porkbun-exporter
     runs-on: ubuntu-latest
     env:
