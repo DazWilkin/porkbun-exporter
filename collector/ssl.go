@@ -28,7 +28,9 @@ func NewSSLCollector(apikey, secret string, domains []string) *SSLCollector {
 	client := porkbun.New(secret, apikey)
 
 	// Porkbun API /ssl endpoint has a 1 qps rate limit (per API key)
-	sslRateLimiter := rate.NewLimiter(rate.Every(time.Second), 1)
+	// Experience suggests that this rate still throws 503s
+	// Reducing to 0.5 qps (1query/2seconds)
+	sslRateLimiter := rate.NewLimiter(rate.Every(2*time.Second), 1)
 
 	return &SSLCollector{
 		client:         client,
@@ -60,10 +62,12 @@ func (c *SSLCollector) Collect(ch chan<- prometheus.Metric) {
 
 			log.Printf("[%s:go] Domain: %s", method, domain)
 
-			// Porkbun API /ssl endpoint has a 1 qps rate limit
+			// Porkbun API /ssl endpoint has a rate limit
 			// Before making requests on /ssl endpoint, wait on the limiter
+			// Rate of 1qps continues to throw 503s
+			// Reduced rate of 0.5qps appears to suffice
 			if err := c.sslRateLimiter.Wait(ctx); err != nil {
-				msg := "Porkbun API rate limit exceeded"
+				msg := "Wait on Porkbun API canceled"
 				log.Printf("[%s:go] %s for domain (%s)", method, msg, domain)
 				return
 			}
@@ -71,6 +75,27 @@ func (c *SSLCollector) Collect(ch chan<- prometheus.Metric) {
 			_, err := c.client.RetrieveSSLBundle(ctx, domain)
 			if err != nil {
 				msg := "unable to retrieve SSL bundle for domain"
+
+				// Porkbun API returns simple text messages for e.g. 400s:
+				// status: 400 message: {"status":"ERROR","message":"The SSL certificate is not ready for this domain."}
+				// With 503s, HTML is returned instead:
+				// status: 503 message: <html>
+				// <head><title>503 Service Temporarily Unavailable</title></head>
+				// <body>
+				// <center><h1>503 Service Temporarily Unavailable</h1></center>
+				// <hr><center>openresty</center>
+				// </body>
+				// </html>
+
+				// Submitted change to nrdcg/porkbun SDK
+				// To capture 503s there
+				// https://github.com/nrdcg/porkbun/pull/6
+
+				// Without the nrdcg/porkbun change, trap 503s here
+				// if err.Error()[0:11] == "status: 503" {
+				// 	err = fmt.Errorf("status: 503 message: Porkbun service unavailable")
+				// }
+
 				log.Printf("[%s:go] %s (%s)\n%s", method, msg, domain, err)
 				return
 			}
