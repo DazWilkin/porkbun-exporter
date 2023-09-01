@@ -80,7 +80,7 @@ groups:
       labels:
         severity: page
       annotations:
-        summary: "Porkbun DNS records changed for {{ $labels.domain }} now {{ $value records }}"
+        summary: "Porkbun DNS records changed for {{ $labels.domain }} now {{ $value }} records"
 ```
 
 ## [Sigstore](https://www.sigstore.dev/)
