@@ -59,6 +59,30 @@ All metrics are prefixed `porkbun_exporter_`
 |`porkbun_exporter_dns_type`|Gauge|A metric that totals a domain's DNS records by type|
 |`porkbun_exporter_start_time`|Gauge|Exporter start time in Unix epoch seconds|
 
+## Alertmanager
+
+```YAML
+groups:
+  - name: porkbun-exporter
+    rules:
+    - alert: porkbun_ssl_certs
+      expr: sum without(domain) (porkbun_exporter_ssl_bundle{}) != X
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: "Porkbun SSL certificates {{ $value }} (expect X)"
+    - alert: porkbun_dns_records
+      expr: |
+            sum without(name,type) (porkbun_exporter_dns_type{domain="D1"}) != X or
+            sum without(name,type) (porkbun_exporter_dns_type{domain="D2"}) != Y
+      for: 1h
+      labels:
+        severity: page
+      annotations:
+        summary: "Porkbun DNS records changed for {{ $labels.domain }} now {{ $value records }}"
+```
+
 ## [Sigstore](https://www.sigstore.dev/)
 
 `porkbun-exporter` container images are being signed by [Sigstore](https://www.sigstore.dev/) and may be verified:
