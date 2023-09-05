@@ -34,6 +34,6 @@ LABEL org.opencontainers.image.source https://github.com/DazWilkin/porkbun-expor
 
 COPY --from=build /go/bin/porkbun-exporter /
 
-EXPOSE 9402
+EXPOSE 8080
 
 ENTRYPOINT ["/porkbun-exporter"]
