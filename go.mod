@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/nrdcg/porkbun v0.4.0
-	github.com/prometheus/client_golang v1.20.1
+	github.com/prometheus/client_golang v1.20.2
 	golang.org/x/time v0.6.0
 )
 
