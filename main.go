@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -51,16 +50,19 @@ var (
 
 func handleHealthz(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		log.Printf("unable to write response: %v", err)
+	}
 }
 func handleRoot(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	fmt.Fprint(w)
-	tRoot.Execute(w, struct {
+	if err := tRoot.Execute(w, struct {
 		Metrics string
 	}{
 		Metrics: *metricsPath,
-	})
+	}); err != nil {
+		log.Printf("unable to execute template: %v", err)
+	}
 }
 func main() {
 	apikey := os.Getenv(APIKey)
